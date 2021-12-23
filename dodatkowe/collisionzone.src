@@ -1,0 +1,150 @@
+&ACCESS RVO1
+&REL 28
+&COMMENT Collision Zone
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+&PARAM DISKPATH = Makros/Robtech
+DEF collisionzone(CollZoneNo :IN, CMD1 :IN)
+DECL CMD CMD1
+INT CollZoneNo
+;***************************************************
+;*
+;* Collisione Zone VER_0812_21
+;*
+;***************************************************
+;###################DO CONFIGA#####################
+;ENUM CMD ON,OFF; Przypisanie mozliwych typow do ENUM 'CMD' 
+
+;SIGNAL I_PLC_Zone_Free_1 $IN[89]  
+;SIGNAL I_PLC_Zone_Free_2 $IN[91]  
+;SIGNAL I_PLC_Zone_Free_3 $IN[93]   
+;SIGNAL I_PLC_Zone_Free_4 $IN[95]
+
+;SIGNAL I_PLC_Rob_Coll_Rel_1 $IN[90] 
+;SIGNAL I_PLC_Rob_Coll_Rel_2 $IN[92] 
+;SIGNAL I_PLC_Rob_Coll_Rel_3 $IN[94] 
+;SIGNAL I_PLC_Rob_Coll_Rel_4 $IN[96]   
+
+;SIGNAL O_PLC_Rob_Coll_Req_1 $OUT[89] 
+;SIGNAL O_PLC_Rob_Coll_Req_2 $OUT[91]  
+;SIGNAL O_PLC_Rob_Coll_Req_3 $OUT[93] 
+;SIGNAL O_PLC_Rob_Coll_Req_4 $OUT[95] 
+
+;SIGNAL O_PLC_Rob_OutOf_Coll_1 $OUT[90] 
+;SIGNAL O_PLC_Rob_OutOf_Coll_2 $OUT[92] 
+;SIGNAL O_PLC_Rob_OutOf_Coll_3 $OUT[94] 
+;SIGNAL O_PLC_Rob_OutOf_Coll_4 $OUT[96]
+
+
+;############ INICJALIZACJA SYGNALOW DO INIT ######
+;O_PLC_Rob_Coll_Req_1 = FALSE
+;O_PLC_Rob_Coll_Req_2 = FALSE  
+;O_PLC_Rob_Coll_Req_3 = FALSE 
+;O_PLC_Rob_Coll_Req_4 = FALSE 
+
+;O_PLC_Rob_OutOf_Coll_1 = TRUE
+;O_PLC_Rob_OutOf_Coll_2 = TRUE 
+;O_PLC_Rob_OutOf_Coll_3 = TRUE 
+;O_PLC_Rob_OutOf_Coll_4 = TRUE
+
+;##################################################  
+
+SWITCH CollZoneNo 
+CASE 1 
+  SWITCH CMD1
+  ;FOLD Collision Zone ON
+  CASE #ON
+
+  O_PLC_Rob_Coll_Req_1=TRUE
+  WAIT FOR I_PLC_Zone_Free_1
+  O_PLC_Rob_OutOf_Coll_1=FALSE
+  WAIT FOR I_PLC_Rob_Coll_Rel_1
+
+  ;ENDFOLD (Collision Zone ON)
+
+  ;FOLD Collision Zone OFF
+  CASE #OFF
+  
+  O_PLC_Rob_Coll_Req_1=FALSE
+  O_PLC_Rob_OutOf_Coll_1=TRUE
+
+  ;ENDFOLD (Collision Zone OFF)
+
+  ENDSWITCH
+ 
+CASE 2
+
+  SWITCH CMD1
+  ;FOLD Collision Zone ON
+  CASE #ON
+
+  O_PLC_Rob_Coll_Req_2=TRUE
+  WAIT FOR I_PLC_Zone_Free_2
+  O_PLC_Rob_OutOf_Coll_2=FALSE
+  WAIT FOR I_PLC_Rob_Coll_Rel_2
+
+  ;ENDFOLD (Collision Zone ON)
+
+  ;FOLD Collision Zone OFF
+  CASE #OFF
+
+  O_PLC_Rob_Coll_Req_2=FALSE
+  O_PLC_Rob_OutOf_Coll_2=TRUE
+
+  ;ENDFOLD (Collision Zone OFF)
+
+  ENDSWITCH
+
+CASE 3
+
+  SWITCH CMD1
+  ;FOLD Collision Zone ON
+  CASE #ON
+
+  O_PLC_Rob_Coll_Req_3=TRUE
+  WAIT FOR I_PLC_Zone_Free_3
+  O_PLC_Rob_OutOf_Coll_3=FALSE
+  WAIT FOR I_PLC_Rob_Coll_Rel_3
+
+  ;ENDFOLD (Collision Zone ON)
+
+  ;FOLD Collision Zone OFF
+  CASE #OFF
+
+  O_PLC_Rob_Coll_Req_3=FALSE
+  O_PLC_Rob_OutOf_Coll_3=TRUE
+
+  ;ENDFOLD (Collision Zone OFF)
+
+  ENDSWITCH
+
+CASE 4
+
+  SWITCH CMD1
+  ;FOLD Collision Zone ON
+  CASE #ON
+
+  O_PLC_Rob_Coll_Req_4=TRUE
+  WAIT FOR I_PLC_Zone_Free_4
+  O_PLC_Rob_OutOf_Coll_4=FALSE
+  WAIT FOR I_PLC_Rob_Coll_Rel_4
+
+  ;ENDFOLD (Collision Zone ON)
+
+  ;FOLD Collision Zone OFF
+  CASE #OFF
+
+  O_PLC_Rob_Coll_Req_4=FALSE
+  O_PLC_Rob_OutOf_Coll_4=TRUE
+
+  ;ENDFOLD (Collision Zone OFF)
+
+  ENDSWITCH
+
+DEFAULT 
+
+  WAIT FOR FALSE ;INCORRECT COLLISION ZONE NUMBER CALLED  
+  
+ENDSWITCH
+  
+END

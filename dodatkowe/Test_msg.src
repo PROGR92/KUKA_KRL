@@ -1,0 +1,95 @@
+&ACCESS RVP
+&REL 60
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+DEF Test_msg( )
+;FOLD INI;%{PE}
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+halt 
+msg = {modul[] "MyTech", Nr 7, msg_txt[] "Continue?"}
+SK[1] = {sk_Type #value, sk_txt[] "yes"}
+SK[2] = {sk_Type #value, sk_txt[] "no"}
+nHandle = Set_KrlDlg (msg, par[], SK[], opt)
+IF (nHandle > 0) THEN
+   while (Exists_KrlDlg(nHandle, keynumber))
+      wait Sec 0.1
+   endwhile
+   switch keynumber
+     case 6
+       WAIT FOR FALSE
+     case 7
+       WAIT FOR FALSE
+     DEFAULT
+       WAIT FOR FALSE
+   endswitch
+ENDIF
+
+
+HALT
+nAnswer=0
+MsgDialog(nAnswer, "Continue %1 ?","MyTech", "PALO" ,"yes", "no","tak" , , , , , , 7)
+
+halt
+ 
+MsgDialog(nAnswer, "Wybierz sposob powrotu do pozycji poczatkowej:", "RESTART", , "Recznie", "Polautomatyczny", "Anuluj" , , , , , ,1) 
+switch nAnswer
+  case 6
+    WAIT FOR FALSE
+  case 7
+    WAIT FOR FALSE
+  default
+    WAIT FOR FALSE
+  endswitch
+
+
+;hfold HOMEPOSITIONSKONTROLLE sonst  T1 und 10% OV_PRO
+
+WHILE NOT $IN_HOME
+$OV_PRO=0
+
+MsgDialog( nAnswer,"Robot nie znajduje sie w pozycji poczatkowej. Wymagane przemieszczenie!.", "RESET", ,"OK" , , , , ,  , , ,1) 
+HALT
+
+WAIT SEC 0.01
+
+;Meldung, T1 und 10% Override
+MsgDialog( nAnswer,"Wymagany tryb T1 oraz predkosc 10%","RESET", , "OK", , , , , , , ,1) 
+
+Halt
+REPEAT
+WAIT FOR ($OV_PRO==10) AND $T1
+WAIT SEC 0.01
+UNTIL ($OV_PRO==10) AND $T1
+
+nAnswer=0
+MsgDialog(nAnswer, "Wybierz sposob powrotu do pozycji poczatkowej:", "RESTART", , "Recznie", "Polautomat", "Anuluj" , , , , , ,1) 
+switch nAnswer
+  case 6
+    MsgDialog(nAnswer, "Wykonaj program z zachowaniem ostroznosci ! ", "RESTART", , "Akceptuje", , , , , , , ,1) 
+    MsgDialog(nAnswer, "W przypadku zagrozenia zatrzymaj robota i omin przeszkode recznie. ", "RESTART", , "Akceptuje", , , , , , , ,1) 
+    to_home_r1()
+  case 7
+    HALT
+  default
+    HALT
+    WAIT FOR FALSE
+ENDSWITCH
+
+    MsgDialog(nAnswer, "Robot w pozycji poczatkowej. ", "RESTART", , "Potwierdz", , , , , , , ,1) 
+
+ENDWHILE
+;hendfold
+
+HALT
+
+END
