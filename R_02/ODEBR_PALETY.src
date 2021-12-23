@@ -1,0 +1,193 @@
+&ACCESS RVP
+&REL 157
+&COMMENT Przelozenie palety od R01
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+&PARAM DISKPATH = KRC:\R1\Program\R_02
+DEF ODEBR_PALETY( )
+;FOLD INI;%{PE}
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+;FOLD INIT PROGRAMU
+
+XHOME={A1 -57,A2 -56.46,A3 90.35,A4 0,A5 56.11,A6 90,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+TOOL_DATA[1]={X 0.000000,Y 0.000000,Z 388.000000,A -0.000000,B -0.000000,C 0.000000}
+TOOL_DATA[2]={X -6.124091,Y -0.006091,Z 522.000000,A -0.000000,B 0.000000,C 0.000000}
+;NOWE WARTOSCI TOOL od krawedyi 100mm
+TOOL_DATA[3]={X -531.0,Y 781.5,Z 517.169826,A 0.000000,B -0.000000,C 0.000000}
+TOOL_DATA[4]={X -531.0,Y -781.5,Z 517.169826,A 0.000000,B -0.000000,C 0.000000}
+TOOL_NAME[1,]="TCP_WARSTWA"
+TOOL_NAME[2,]="TCP_PALETA"
+TOOL_NAME[3,]="TCP_KANT_PRAWY"
+TOOL_NAME[4,]="TCP_KANT_LEWY"
+BASE_DATA[1]={X 1214.0,Y 357.7,Z -1850.000000,A -90.000000,B -0.000000,C -0.000000}
+BASE_DATA[2]={X -1715.02,Y -1626.888,Z -1850.000000,A -90.000005,B -0.000000,C 0.000000}
+BASE_DATA[3]={X -345.86,Y 2557.0,Z -1000.003950,A 180.000000,B -0.000000,C 0.000000}
+BASE_DATA[4]={X -1979.964821,Y -1.900569,Z -506.047363,A 0.000000,B -0.000000,C 0.000000}
+BASE_DATA[5]={X 1385.74,Y 2102.86,Z -1850,A 0.000000,B -0.000000,C 0.000000}
+BASE_TYPE[1]=#BASE
+BASE_TYPE[2]=#BASE
+BASE_TYPE[3]=#BASE
+BASE_TYPE[4]=#BASE
+BASE_TYPE[5]=#BASE
+BASE_NAME[1,]="NA_WPROST"
+BASE_NAME[2,]="NA_PRAWO"
+BASE_NAME[3,]="ODLOZENIE"
+BASE_NAME[4,]="STOS_PAL_POBRANIE"
+BASE_NAME[5,]="ODLOZENIE_PALETY"
+
+;ENDFOLD INIT
+
+;FOLD PTP HOME Vel=100 % DEFAULT;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=HOME; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=DEFAULT; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PDEFAULT
+FDAT_ACT = FHOME
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XHOME
+;ENDFOLD
+
+;axis pos
+;FOLD PTP TO_PIC_PALL_05 CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[4]:STOS_PAL_POBRANIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PIC_PALL_05; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PIC_PALL_05
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_PIC_PALL_05 C_Dis
+;ENDFOLD
+;FOLD PTP TO_PIC_PALL_6 Vel=100 % PDATH Tool[2]:TCP_PALETA Base[0];%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PIC_PALL_6; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PIC_PALL_6
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_PIC_PALL_6
+;ENDFOLD
+
+TOOL_DATA[2]={X 50.0,Y -0.0,Z 522.000000,A -0.000000,B 0.000000,C 0.000000}
+XTO_PIC_PALL_10={X 0.0,Y 0.0,Z 1372.0, A 0.0, B 0.0, C 180.0, S 2,T 3}
+;FOLD PTP TO_PIC_PALL_10 CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[4]:STOS_PAL_POBRANIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PIC_PALL_10; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PIC_PALL_10
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_PIC_PALL_10 C_Dis
+;ENDFOLD
+
+XPIC_PALL={X 0.0, Y 0.0, Z 120.0, A 0.0, B 0.0, C 180.0, S 2, T 3}
+;FOLD LIN PIC_PALL Vel=0.5 m/s LDATL Tool[2]:TCP_PALETA Base[4]:STOS_PAL_POBRANIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PIC_PALL; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATL; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATL
+FDAT_ACT = FPIC_PALL
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XPIC_PALL
+;ENDFOLD
+
+TOOL_DATA[2]={X 0.0,Y -0.0,Z 522.000000,A -0.000000,B 0.000000,C 0.000000}
+XPIC_PALL={X 0.0, Y 0.0, Z 120.0, A 0.0, B 0.0, C 180.0, S 2, T 3}
+;FOLD LIN PIC_PALL Vel=0.5 m/s LDATL Tool[2]:TCP_PALETA Base[4]:STOS_PAL_POBRANIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PIC_PALL; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATL; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATL
+FDAT_ACT = FPIC_PALL
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XPIC_PALL
+;ENDFOLD
+
+XPOST_PIC_PALL = $POS_ACT
+XPOST_PIC_PALL.Z = XPOST_PIC_PALL.Z + 100
+;FOLD LIN POST_PIC_PALL Vel=0.5 m/s LDATL Tool[2]:TCP_PALETA Base[4]:STOS_PAL_POBRANIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=POST_PIC_PALL; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATL; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATL
+FDAT_ACT = FPOST_PIC_PALL
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XPOST_PIC_PALL
+;ENDFOLD
+
+;FOLD LIN TO_PIC_PALL_10 CONT Vel=0.5 m/s LDATL Tool[2]:TCP_PALETA Base[4]:STOS_PAL_POBRANIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PIC_PALL_10; Kuka.BlendingEnabled=True; Kuka.MoveDataName=LDATL; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATL
+FDAT_ACT = FTO_PIC_PALL_10
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XTO_PIC_PALL_10 C_Dis C_Dis
+;ENDFOLD
+;FOLD PTP TO_PIC_PALL_6 Vel=100 % PDATH Tool[2]:TCP_PALETA Base[0] ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PIC_PALL_6; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PIC_PALL_6
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_PIC_PALL_6
+;ENDFOLD
+
+XPRE_PAL_DROOP={X 0.0,Y 0.0,Z 2100.0,A -90.0,B 0.0,C 180.0,S 2, T 11}
+;FOLD PTP PRE_PAL_DROOP CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[5]:ODLOZENIE_PALETY;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PRE_PAL_DROOP; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FPRE_PAL_DROOP
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XPRE_PAL_DROOP C_Dis
+;ENDFOLD
+
+;Odlozenie pustej palety
+DROOP_PALL() 
+
+
+;FOLD PTP HOME Vel=100 % DEFAULT;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=HOME; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=DEFAULT; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PDEFAULT
+FDAT_ACT = FHOME
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XHOME
+;ENDFOLD
+
+END

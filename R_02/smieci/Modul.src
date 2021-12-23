@@ -1,0 +1,58 @@
+&ACCESS RVP
+&REL 14
+DEF Modul( )
+;FOLD INI
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+XHOME={AXIS: A1 0,A2 -90,A3 90,A4 0,A5 30,A6 0}
+INTERRUPT DECL 11 WHEN $IN[1] DO IR_PROG ( )
+I[1]=0 ;Set predefined counter to 0
+;----------- Main section ----------
+PTP XHOME ;BCO run
+INTERRUPT ON 11
+MOVEP ( ) ;Motion along the search path
+$ADVANCE=3 ;Reset advance run
+INTERRUPT OFF 11
+GRIP ( ) 
+PTP XHOME
+END
+;---------- Subprogram --------------
+DEF MOVEP ( ) ;Subprogram for search path motion
+PTP {X 1232,Y -263,Z 1000,A 0,B 67,C -90}
+LIN {X 1232,Y 608,Z 1000,A 0,B 67,C -90}
+$ADVANCE=0 ;Stop advance run
+END ;
+;--------- Interrupt program --------
+DEF IR_PROG ( ) ;Save position of parts
+;INTERRUPT OFF 11
+I[1]=I[1]+1
+POSITION [I[1]] = $POS_INT ;Position saved 
+IF I[1]==4 THEN ;4 parts detected
+BRAKE ;Motion stopped
+RESUME ;IR_PROG & MOVE canceled
+ENDIF
+;INTERRUPT ON 11
+END
+;---------- Subprogram --------------l
+DEF GRIP ( ) ;Grip detected parts
+INT POS_NO ;Counter variable
+FOR POS_NO=I[1] TO 1 STEP -1
+POSITION[POS_NO].Z=POSITION[POS_NO].Z+200
+LIN POSITION[POS_NO] ;Move to 200 mm above part
+LIN_REL {Z -200} ;Move vertically to part
+; Pick up part
+LIN POSITION[POS_NO] ;Move back up
+LIN {X 634,Y 1085,Z 1147,A 49,B 67,C -90}
+; Set down part
+ENDFOR
+
+END

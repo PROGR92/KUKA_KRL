@@ -1,0 +1,967 @@
+&ACCESS RVP
+&COMMENT Concept_v1
+&PARAM DISKPATH = KRC:\R1\Program\R_02
+DEF offline_R2_1612( )
+;FOLD INI
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+;FOLD STRUKTURA PROGRAMU 
+;OK Kontrola chwytaka
+
+;OK Ruch nad stos
+
+;OK Dojazd do momentu wykrycia ELEMENTU oraz zwolnienie
+
+;OK Dojazd do elementu - Pobranie
+
+;OK Test chwytaka
+
+; Zalaczenie kontroli elementu w chwytaku
+
+;OK Odjazd powoli ponad stos
+
+;OK Odjazd szybkina bezpieczna wysokosc przejazdowa
+
+; odpytanie strefy kolizyjnej
+; PUNKTY TRANSPORTU nad odlozenie
+
+; Dojazd do odlozenia
+
+;Program odlozenia
+;**************************************
+; Otwarcie chwytaka i kontrola otwarcia
+
+; Odjazd powolny nad zrzut sprawdzenie w locie czy chwytak jest pusty 
+
+; Odjazd do punktu nad odlozeniem
+;**************************************
+
+; TEST STOSU 1(TEN) lub 2(INNY)
+
+; GOTO LABEL1 OR GOTO LABEL2 
+;endfold struktura programu 
+$CYCFLAG[2] =  ( i_LewyKant OR  i_PrawyKant) ;i_LewyKant==$IN[146], i_PrawyKant $IN[145]     
+;******************************************
+INTERRUPT DECL 24 WHEN  i_NaciskBoczny == FALSE DO PART_CONTROL()    ;Zatrzymanie podczas transportu utrata sygnalu obecnosci czesci
+INTERRUPT DECL 23 WHEN  i_LewyKant == FALSE DO IR_SLOWDOWN()         ;Zwolnienie ruchu podczas dojazdu pionowego do pobrania n-tej warstwy
+
+INTERRUPT DECL 30 WHEN  i_LewyKant == FALSE DO IR_MOVESTOP()    ;STOP podczas dojazdu do pierwszej warstwy
+INTERRUPT DECL 31 WHEN  $CYCFLAG[2] DO IR_MOVESTOP()            ;Stop wykrywania krawedzi welny
+INTERRUPT DECL 32 WHEN  i_LewyKant==TRUE DO IR_MOVESTOP()       ;Stop Rotacji
+INTERRUPT DECL 33 WHEN  i_PrawyKant==TRUE DO IR_MOVESTOP()      ;Stop Rotacji
+INTERRUPT DECL 34 WHEN  i_Zatrzymaj == TRUE DO IR_MOVESTOP()    ;STOP podczas zjazdu pionowego do wysokosci pozycji pobrania
+INTERRUPT DECL 35 WHEN  i_NaciskBoczny == TRUE DO IR_MOVESTOP() ;STOP podczas dojazdu bocznego do pobrania
+;******************************************
+
+ 
+;FOLD ; 30.11.21 10:24 NAME: ini CHANGES: dodanie zabezpieczenia dojazdu bocznego ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=30.11.21 10:24; Kuka.Name=ini; Kuka.Content=dodanie zabezpieczenia dojazdu bocznego
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 30.11.21 10:30 NAME: ini CHANGES: Dodanie zapamietania orientacji pozycji pobrania ->poz nad stosem ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=30.11.21 10:30; Kuka.Name=ini; Kuka.Content=Dodanie zapamietania orientacji pozycji pobrania ->poz nad stosem
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 30.11.21 10:33 NAME: ini CHANGES: Zabezpieczenie max. wysokosci odjazdu po pobraniu ze stosu welny ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=30.11.21 10:33; Kuka.Name=ini; Kuka.Content=Zabezpieczenie max. wysokosci odjazdu po pobraniu ze stosu welny
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 30.11.21 10:45 NAME: ini CHANGES: Zerowanie timera[1] na koncu programu ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=30.11.21 10:45; Kuka.Name=ini; Kuka.Content=Zerowanie timera[1] na koncu programu
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 03.12.21 15:21 NAME:  CHANGES: Zmiana wysokosci i orientacji w przeniesieniu palety ze stosu2 ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=03.12.21 15:21; Kuka.Name=; Kuka.Content=Zmiana wysokosci i orientacji w przeniesieniu palety ze stosu2
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 03.12.21 15:20 NAME: ini CHANGES: Usuniecie smieci po zastopieniu rochow-programem odlozenia palety ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=03.12.21 15:20; Kuka.Name=ini; Kuka.Content=Usuniecie smieci po zastopieniu rochow-programem odlozenia palety
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 06.12.21 12:33 NAME: ini CHANGES: wyczyszczenie .dat z smieci po przen. odl. palety do podprog. ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=06.12.21 12:33; Kuka.Name=ini; Kuka.Content=wyczyszczenie .dat z smieci po przen. odl. palety do podprog.
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 06.12.21 13:04 NAME: ini CHANGES: zmiana $IN na nazwy SIGNAL ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=06.12.21 13:04; Kuka.Name=ini; Kuka.Content=zmiana $IN na nazwy SIGNAL
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 06.12.21 14:41 NAME: ini CHANGES: Uzalenienie od syg PLC -dodanie i przeniesienie funkcji przenoszenia palety na poczate ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=06.12.21 14:41; Kuka.Name=ini; Kuka.Content=Uzalenienie od syg PLC -dodanie i przeniesienie funkcji przenoszenia palety na poczate
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 09.12.21 12:03 NAME: ini CHANGES: Zmiana calkowita mierzenia pozycji i orientacji pierwszej warstwy ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=09.12.21 12:03; Kuka.Name=ini; Kuka.Content=Zmiana calkowita mierzenia pozycji i orientacji pierwszej warstwy
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 10.12.21 12:06 NAME: ini CHANGES: zwolnienie predkosci obrotowej w dopasowaniu orientacji do warstwy ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=10.12.21 12:06; Kuka.Name=ini; Kuka.Content=zwolnienie predkosci obrotowej w dopasowaniu orientacji do warstwy
+;ENDFOLD
+;ENDFOLD
+;FOLD ; 13.12.21 09:12 NAME: ini CHANGES: dodanie offsetu dla pobierania nastepnej warstwy wzgledem poprzedniej ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.comments.datetimecomment; Kuka.DateTime=13.12.21 09:12; Kuka.Name=ini; Kuka.Content=dodanie offsetu dla pobierania nastepnej warstwy wzgledem poprzedniej
+;ENDFOLD
+;ENDFOLD
+
+;FOLD INIT PROGRAMU
+
+; XHOME={A1 -57,A2 -53.0000,A3 92.0000,A4 0,A5 51,A6 90,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+XHOME={A1 -57,A2 -56.46,A3 90.35,A4 0,A5 56.11,A6 90,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+TOOL_DATA[1]={X 0.000000,Y 0.000000,Z 388.000000,A -0.000000,B -0.000000,C 0.000000}
+TOOL_DATA[2]={X -6.124091,Y -0.006091,Z 522.000000,A -0.000000,B 0.000000,C 0.000000}
+;TOOL_DATA[3]={X -631.120273,Y 874.168253,Z 517.169826,A 0.000000,B -0.000000,C 0.000000}
+;TOOL_DATA[4]={X -631.120273,Y -874.168253,Z 517.169826,A 0.000000,B -0.000000,C 0.000000}
+;NOWE WARTOSCI TOOL od krawedyi 100mm
+TOOL_DATA[3]={X -531.0,Y 781.5,Z 517.169826,A 0.000000,B -0.000000,C 0.000000}
+TOOL_DATA[4]={X -531.0,Y -781.5,Z 517.169826,A 0.000000,B -0.000000,C 0.000000}
+TOOL_NAME[1,]="TCP_WARSTWA"
+TOOL_NAME[2,]="TCP_PALETA"
+TOOL_NAME[3,]="TCP_KANT_PRAWY"
+TOOL_NAME[4,]="TCP_KANT_LEWY"
+BASE_DATA[1]={X 1214.0,Y 357.7,Z -1850.000000,A -90.000000,B -0.000000,C -0.000000}
+BASE_DATA[2]={X -1715.02,Y -1626.888,Z -1850.000000,A -90.000005,B -0.000000,C 0.000000}
+BASE_DATA[3]={X -345.86,Y 2557.0,Z -1000.003950,A 180.000000,B -0.000000,C 0.000000}
+BASE_DATA[4]={X -1979.964821,Y -1.900569,Z -506.047363,A 0.000000,B -0.000000,C 0.000000}
+BASE_DATA[5]={X 1385.74,Y 2102.86,Z -1850,A 0.000000,B -0.000000,C 0.000000}
+BASE_TYPE[1]=#BASE
+BASE_TYPE[2]=#BASE
+BASE_TYPE[3]=#BASE
+BASE_TYPE[4]=#BASE
+BASE_TYPE[5]=#BASE
+BASE_NAME[1,]="NA_WPROST"
+BASE_NAME[2,]="NA_PRAWO"
+BASE_NAME[3,]="ODLOZENIE"
+BASE_NAME[4,]="STOS_PAL_POBRANIE"
+BASE_NAME[5,]="ODLOZENIE_PALETY"
+
+;ENDFOLD INIT
+
+;FOLD Wybor PALETY PRZYPISANIE ORIENTACJI PRZEJAZDOWYCH DO POZYCJI
+IF $FLAG[2] THEN
+  BASE_DATA[1]=BASE_DATA[1]
+  XTO_PIC={A1 -57,A2 -67.41,A3 65.86,A4 0,A5 91.55, A6 90,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+  XTO_END={A1 -57,A2 -67.41,A3 65.86,A4 0,A5 91.55, A6 0,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+  XTO_DROOP={A1 -61.0,A2 -71.4864,A3 71.54109,A4 0,A5 89.94566, A6 90,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+  XTO_DROOP_05={A1 -80.0,A2 -45.36,A3 79.75,A4 0,A5 55.41, A6 100}
+  XFROM_PALL_PIC={A1 -57,A2 -67.41,A3 65.86,A4 0,A5 91.55, A6 90,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+ELSE
+  BASE_DATA[1]=BASE_DATA[2]
+  XTO_PIC={A1 -57,A2 -67.41,A3 65.86,A4 0,A5 91.55, A6 180,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+  XTO_END={A1 -57,A2 -67.41,A3 65.86,A4 0,A5 91.55, A6 0,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+  XTO_DROOP={A1 -62,A2 -71.4864,A3 71.54109,A4 0,A5 89.94566, A6 160}
+  XTO_DROOP_05={A1 -62.0,A2 -45.36,A3 79.75,A4 0,A5 55.41, A6 160}
+  XFROM_PALL_PIC={A1 -57,A2 -83.41,A3 65.86,A4 0,A5 91.55, A6 180,E1 0.0,E2 0.0,E3 0.0,E4 0.0,E5 0.0,E6 0.0}
+ENDIF 
+;ENDFOLD PRZYPISANIE POZ PRZEJAZDOWYCH
+
+;$FLAG[3]oznaczenie potrzeby mierzenia warstwy 
+$FLAG[3]=TRUE
+;Inicjacja pozycji nad stosem
+XAbove_Point={X 575.0,Y 1200.0,Z 3050.0,A 0.0,B 0.0,C 180.0}
+PREV_PICPOS=0 ;wyzerowanie pozycji poprzedniego pobrania
+
+;POZYCJA DOMOWA
+;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART = FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS (#PTP_PARAMS,100 )
+$H_POS=XHOME
+PTP  XHOME
+;ENDFOLD
+
+
+;GRIP TEST_&_INIT
+WAIT FOR (NOT i_Zatrzymaj AND NOT i_NaciskBoczny AND i_PrawyKant AND i_LewyKant )
+;FOLD Gripper SET [1]WIDLY State=[1]OPEN Wait 0.2[s] Check with No Check ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=1;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=0
+;ENDFOLD
+GRPg_SetStateAndCheck(1, 1, 0.2, 0)
+;ENDFOLD
+;FOLD Gripper SET [2]Silowniki_scisku State=[1]OPEN Wait 0.2[s] Check with No Check ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=2;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=0
+;ENDFOLD
+GRPg_SetStateAndCheck(2, 1, 0.2, 0)
+;ENDFOLD
+;FOLD Gripper SET [3]widly_paleta State=[1]OPEN Wait 0.2[s] Check with No Check ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=3;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=0
+;ENDFOLD
+GRPg_SetStateAndCheck(3, 1, 0.2, 0)
+;ENDFOLD
+;FOLD Gripper SET [4]SERWO State=[1]OPEN Wait 0.2[s] Check with No Check ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=4;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=0
+;ENDFOLD
+GRPg_SetStateAndCheck(4, 1, 0.2, 0)
+;ENDFOLD
+
+
+;FOLD START POMIARU CZASU CYKLU
+$TIMER[1]=0
+$TIMER_STOP[1]=FALSE
+;ENDFOLD START POMIARU CZASU CYKLU
+;*********************** 
+;*****PETLA PRACY*******
+;***********************
+REPEAT
+
+
+;$$$$$$$$$$$$$$$$$$$$$$$$$$$
+;****** POBRANIE ***********
+;$$$$$$$$$$$$$$$$$$$$$$$$$$$
+;FOLD PTP TO_PIC CONT Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[0];%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PIC; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PIC
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_PIC C_Dis
+;ENDFOLD
+
+;FOLD PTP Above_Point Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[1]:NA_WPROST;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=Above_Point; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FAbove_Point
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XAbove_Point
+;ENDFOLD
+
+;ddddddddddddddddddd
+ ; Transport Palety
+IF ( i_PLC_REQ_PALL ) THEN
+
+;FOLD PRZELOZENIE PUSTEJ PALETY
+;Trajektoria dojazdu do palety ponizej  
+;stale pozycje inaczej zmowu mierzenie
+;SPRAWDZ MAX OTWARCIE CHWYTAKA
+
+;X=-50-mm
+XTO_PALLPIC_05={X 525.0,Y 1200.0,Z 150.0, A 0 ,B 0, C 180}
+;FOLD LIN TO_PALLPIC_05 CONT Vel=2 m/s LDATM Tool[2]:TCP_PALETA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PALLPIC_05; Kuka.BlendingEnabled=True; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=2; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FTO_PALLPIC_05
+BAS(#CP_PARAMS, 2.0)
+SET_CD_PARAMS (0)
+LIN XTO_PALLPIC_05 C_Dis C_Dis
+;ENDFOLD
+
+;X=-50-mm przesuniecie w strone odbojw palety
+XTO_PALLPIC_10={X 525.0,Y 1200.0,Z -30.0, A 0 ,B 0, C 180}
+;FOLD LIN TO_PALLPIC_10 CONT Vel=0.3 m/s LDATM Tool[2]:TCP_PALETA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PALLPIC_10; Kuka.BlendingEnabled=True; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=0.3; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FTO_PALLPIC_10
+BAS(#CP_PARAMS, 0.3)
+SET_CD_PARAMS (0)
+LIN XTO_PALLPIC_10 C_Dis C_Dis
+;ENDFOLD
+
+;POZYCJA POBRANIA PALETY
+XPALL_PIC={X 625.0,Y 1200.0,Z -30.0, A 0 ,B 0, C 180}
+;FOLD LIN PALL_PIC Vel=0.3 m/s LDATL Tool[2]:TCP_PALETA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PALL_PIC; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATL; Kuka.VelocityPath=0.3; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATL
+FDAT_ACT = FPALL_PIC
+BAS(#CP_PARAMS, 0.3)
+SET_CD_PARAMS (0)
+LIN XPALL_PIC
+;ENDFOLD
+
+
+;FOLD Gripper SET [3]widly_paleta State=[2]CLOSE Wait 0.2[s] Check with Strategy 1 ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=3;setstate=2;setcont=nocont;waittime=0.2;errorstrategy=1
+;ENDFOLD
+GRPg_SetStateAndCheck(3, 2, 0.2, 1)
+;ENDFOLD
+
+XPALLET_UP=$POS_ACT
+XPALLET_UP.Z=XPALLET_UP.Z+200
+XPALLET_UP.X=XPALLET_UP.X; + ABS(of_toolX)
+;FOLD LIN PALLET_UP Vel=0.5 m/s LDATM Tool[2]:TCP_PALETA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PALLET_UP; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FPALLET_UP
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XPALLET_UP
+;ENDFOLD
+
+;UZYC W RAZIE PROBLEMOW PODCZAS TESTOW
+;IF ($FLAG[2]==FALSE) THEN
+
+XPAL_ABOVE={Z 2900.0}
+
+;ELSE
+;  XPAL_ABOVE={Z 2900.0}
+;ENDIF
+
+;FOLD LIN PAL_ABOVE CONT Vel=1 m/s LDATM Tool[2]:TCP_PALETA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PAL_ABOVE; Kuka.BlendingEnabled=True; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=1; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FPAL_ABOVE
+BAS(#CP_PARAMS, 1.0)
+SET_CD_PARAMS (0)
+LIN XPAL_ABOVE C_Dis C_Dis
+;ENDFOLD
+
+;Pozycja osiowa rozna dla STOS1 i STOS2
+;FOLD PTP FROM_PALL_PIC CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=FROM_PALL_PIC; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FFROM_PALL_PIC
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XFROM_PALL_PIC C_Dis
+;ENDFOLD
+
+XTO_PAL_DROOP={X -46.0,Y 250.0,Z 2300.0,A -33.0, B 0.0,C 180.0}
+;FOLD PTP TO_PAL_DROOP CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[5]:ODLOZENIE_PALETY;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PAL_DROOP; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PAL_DROOP
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_PAL_DROOP C_Dis
+;ENDFOLD
+
+XTO_PAL_DROOP_05=XTO_PAL_DROOP
+XTO_PAL_DROOP_05.A=-90
+;FOLD PTP TO_PAL_DROOP_05 Vel=100 % PDATH Tool[2]:TCP_PALETA Base[5]:ODLOZENIE_PALETY;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PAL_DROOP_05; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PAL_DROOP_05
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_PAL_DROOP_05
+;ENDFOLD
+
+
+DROOP_PALL()  
+
+;DLA PUNKTU PO PRZESKOKU DO: LABEL1
+TOOL_DATA[1]={X 0,Y 0.000000,Z 388.000000,A -0.000000,B -0.000000,C 0.000000}
+;ENDFOLD PRZELOZENIE pustej Palety
+
+;Skok do zakonczenia programu po odlozeniu palety
+GOTO LABEL1
+
+;ENDIF Trans. Palety 
+;ddddddddddddddddddd
+ENDIF
+
+
+
+;XXXXXXXXXXXXXXXXXXX
+ ; Zjazd do pobrania
+IF ( $FLAG[3] ) THEN ; $FLAG[3]oznaczenie potrzeby mierzenia warstwy
+
+;Inicjacja pozycji nad stosem
+XAbove_Point={X 675.0,Y 1200.0,Z 3050.0,A 0.0,B 0.0,C 180.0}
+;FOLD PTP Above_Point Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[1]:NA_WPROST;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=Above_Point; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FAbove_Point
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XAbove_Point
+;ENDFOLD
+
+;FOLD MIERZENIE WARSTWY PIERWSZEJ 
+IF (NOT i_LewyKant) THEN ;Wykrycie warstwy w punkcie nad stosem
+  GOTO LABEL2
+ENDIF
+
+;CZEKAJ NA NC-sygnal lewego i prawego kanta
+WAIT FOR  i_LewyKant AND i_PrawyKant
+
+;zzzzzzzzzzzzzzzz-p
+;ZJAZD DO WYKRYCIA
+INTERRUPT ON 30 ; Przerwanie/skasowanie ruchu   
+
+Fpozy2 = FAbove_Point
+Xpozy2 = {X 675.0,Y 1200.0,Z 260.0}
+OVPRO_PRZED = $OV_PRO
+
+Ruch_W_Dol(0.5) ; Szybki zjazd w dol 
+
+INTERRUPT OFF 30 ; Przerwanie/skasowanie ruchu 
+$ADVANCE = 3
+;zzzzzzzzzzzzzzzz-k
+
+
+
+;aaaaaaaaaaaaaaaa-p
+; Przeskok z braku syg. z LEWEGO kanta
+LABEL2:
+
+;TEST CZUJNIKA WYKRYCIA WARSTWY
+WAIT FOR (NOT i_LewyKant AND NOT i_PrawyKant)
+;aaaaaaaaaaaaaaaa-k
+
+;bbbbbbbbbbbbbbbb-p
+;RUCH DO PZYCJI SKRAJNEJ
+
+Fpozy2=FAbove_Point
+Xpozy2=$POS_ACT
+Xpozy2.x=425 ;.X-zdefiniowany limit maksymalnego przesuniecia
+
+INTERRUPT ON 31;Dojazd do pozycji skrajnej
+
+Ruch_W_Dol(0.05)
+
+INTERRUPT OFF 31;Dojazd do pozycji skrajnej
+$ADVANCE = 3
+
+WAIT FOR ( i_LewyKant OR i_PrawyKant);powinna zadzialac przynajmniej jednen z czujnikow
+;bbbbbbbbbbbbbbbb-k
+
+
+;ccccccccccccccc-p
+INTERRUPT ON 32;STOP_ROTATION L
+INTERRUPT ON 33;STOP_ROTATION P
+;FOLD OBROT DOPASOWANIA DO WARSTWY
+IF (( i_LewyKant) AND (NOT i_PrawyKant)) THEN
+  OBROT_DOPASOWANIA(4,1,{A -5.0,B 0.0,C 0.0 })
+  HALT ;test
+ELSE
+  IF ((NOT i_LewyKant) AND  ( i_PrawyKant)) THEN
+    OBROT_DOPASOWANIA(3,1,{A 5.0,B 0.0,C 0.0 })
+    HALT ;test
+  ENDIF
+ENDIF
+;ENDFOLD obrot dopasowania
+INTERRUPT OFF 32;STOP_ROTATION L
+INTERRUPT OFF 33;STOP_ROTATION P
+$ADVANCE = 3
+
+;Test pozycji nieruch. czesci chwytaka
+WAIT FOR ( i_LewyKant AND i_PrawyKant ) 
+;ccccccccccccccc-k
+
+
+;ddddddddddddddd-p
+;OFFSET-X wzgl pozycji czuj. Kantow wzgl. krawedzi chwytaka
+
+;LDAT_ACT = LLDATM
+FDAT_ACT = FPos_oriented_05
+BAS(#CP_PARAMS, 1.0)
+XPos_oriented_05=$POS_ACT
+XPos_oriented_05.X=XPos_oriented_05.X+50 ;ofset o stala odleglosc
+;FOLD LIN Pos_oriented_05 Vel=1 m/s LDATM Tool[1]:TCP_WARSTWA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=Pos_oriented_05; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=1; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FPos_oriented_05
+BAS(#CP_PARAMS, 1.0)
+SET_CD_PARAMS (0)
+LIN XPos_oriented_05
+;ENDFOLD
+;ddddddddddddddd-k
+
+;eeeeeeeeeeeeee-p
+;ZJAZD DO WARSTWY do momentu wykrycia nacisku pionowego
+Fpozy2=FAbove_Point
+Xpozy2=$POS_ACT
+Xpozy2.z=Xpozy2.z-300 ; Z-maxymalny offset gdzie powinno wykryc warstwe
+if (Xpozy2.Z < 130 ) THEN ;130 wysokosc warstwy
+  Xpozy2.Z = 130
+ENDIF
+OVPRO_PRZED=$OV_PRO
+
+INTERRUPT ON 34 ;BRAKE MOVEMENT DIRECTION 
+
+Ruch_W_Dol(0.1) ; Precyzyjny zjazd do pozycji pobrania w Z-cie 
+
+INTERRUPT OFF 34 ;BRAKE MOVEMENT DIRECTION
+$ADVANCE = 3
+WAIT FOR i_Zatrzymaj
+;eeeeeeeeeeeeee-k
+
+;ffffffffffffff-p
+;Dojazd od boku
+
+Xpozy2=$POS_ACT
+Xpozy2.X = 675 ;X= maxymalne odchylka pozycji
+
+TOOL_DATA[1]={X -50,Y 0.000000,Z 388.000000,A -0.000000,B -0.000000,C 0.000000}
+
+INTERRUPT ON 35;Dojazd boczny KR_sick
+
+Ruch_W_Dol(0.1)
+
+INTERRUPT OFF 35;Dojazd boczny KR_sick
+$ADVANCE = 3
+WAIT FOR i_NaciskBoczny 
+;ffffffffffffff-k
+;ENDFOLD Mierzenia warstwy pierwszej
+
+;KOLEJNA WARSTWA PODCZAS DEPALETYZACJI
+  ELSE
+
+;FOLD POBIERANIE n-tej WARSTWY
+;gggggggggggggg-p
+;Zjazd do kolejnej warstwy w cyklu depaletyzacji danego stosu
+
+INTERRUPT ON 34 ;Przerwanie/skasowanie ruchu  
+INTERRUPT ON 23 ;Zwolnienie predkosci dojazdowej
+
+Fpozy2=FAbove_Point
+IF (PREV_PICPOS>280)THEN
+Xpozy2={Z 0}
+Xpozy2.Z=PREV_PICPOS-150 ;150 mm ofsetu w dojezdzie w dol wzgledem poprzedniej warstwy
+ELSE
+Xpozy2.Z = 130
+ENDIF
+OVPRO_PRZED=$OV_PRO
+
+Ruch_W_Dol(1.0) ; Szybki zjazd w dol 
+
+INTERRUPT OFF 23 ;Zwolnienie predkosci dojazdowej
+INTERRUPT OFF 34 ;Przerwanie/skasowanie ruchu  
+
+$ADVANCE = 3
+WAIT FOR i_Zatrzymaj
+;gggggggggggggg-k
+
+;ffffffffffffff-p
+;Dojazd od boku
+
+Xpozy2=$POS_ACT
+Xpozy2.X = 675 ;X= maxymalne odchylka pozycji
+
+TOOL_DATA[1]={X -50,Y 0.000000,Z 388.000000,A -0.000000,B -0.000000,C 0.000000}
+
+INTERRUPT ON 35;Dojazd boczny KR_sick
+
+Ruch_W_Dol(0.3)
+
+INTERRUPT OFF 35;Dojazd boczny KR_sick
+$ADVANCE = 3
+WAIT FOR i_NaciskBoczny 
+;ffffffffffffff-k
+;ENDFOLD Pobieranie n-tej warstwy 
+
+;XXXXXXXXXXXXXXXXXXX
+;ENDIF Zjazd do pobrania
+ENDIF
+
+;USTAWIENIE FLAGI KONIECZNOSCI POMIARU NASTEPNEJ WARSTWY NA FALSE
+$FLAG[3]=FALSE
+
+;Test pozycji nieruch. czesci chwytaka
+WAIT FOR (NOT i_LewyKant AND NOT i_PrawyKant AND i_NaciskBoczny AND i_Zatrzymaj) 
+
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+;Zamkniecie chwytaka
+;FOLD Gripper SET [4]SERWO State=[2]CLOSE Wait 0.2[s] Check with Strategy 1 ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=4;setstate=2;setcont=nocont;waittime=0.2;errorstrategy=1
+;ENDFOLD
+GRPg_SetStateAndCheck(4, 2, 0.2, 1)
+;ENDFOLD
+;FOLD Gripper SET [2]Silowniki_scisku State=[2]CLOSE Wait 0.2[s] Check with No Check ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=2;setstate=2;setcont=nocont;waittime=0.2;errorstrategy=0
+;ENDFOLD
+GRPg_SetStateAndCheck(2, 2, 0.2, 0)
+;ENDFOLD
+IF ( i_Wbij_Kolce ) THEN ; Wbicie kolcy w welne
+;FOLD Gripper SET [1]WIDLY State=[2]CLOSE Wait 0.2[s] Check with No Check ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=1;setstate=2;setcont=nocont;waittime=0.2;errorstrategy=0
+;ENDFOLD
+GRPg_SetStateAndCheck(1, 2, 0.2, 0)
+;ENDFOLD
+ENDIF
+
+;Przywrocenie predkosci
+HALT
+$OV_PRO = OVPRO_PRZED
+
+;WLACZENIE KONTROI CZESCI W CHYTAKU
+INTERRUPT ON 24;
+
+;FOLD TEST BEZPIECZNEJ WYSOKOSCI ODJAZDU NAD STOS
+;Przyw.ukladu odniesienia robota
+FDAT_ACT = FPOS_x_offset
+BAS (#PTP_PARAMS,100 )
+
+XPOST_PIC = $POS_ACT
+PREV_PICPOS=XPOST_PIC.Z
+IF ((XPOST_PIC.Z)<(XAbove_Point.Z-100)) THEN
+  XPOST_PIC.Z = XPOST_PIC.Z + 100 
+ELSE
+  XPOST_PIC.Z = XAbove_Point.Z 
+ENDIF
+;ENDFOLD BEZP.POZ.ODJ.NAD STOS
+
+;xxxxxxxxxxxxx-p
+;NADPISANIE  .A  ORAZ .X - XAbove_Point aktualnymi watrosciami pobrania warstwy
+XAbove_Point.A=XPOST_PIC.A
+Xabove_Point.X=XPOST_PIC.X
+;xxxxxxxxxxxxx-k
+
+;Powolny odjazd
+;FOLD LIN POST_PIC Vel=0.5 m/s LDATM Tool[1]:TCP_WARSTWA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=POST_PIC; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FPOST_PIC
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XPOST_PIC
+;ENDFOLD
+
+
+;Sprawdzenie obecnosci czesci
+WAIT FOR ( i_NaciskBoczny )
+
+;FOLD LIN Above_Point CONT Vel=1 m/s LDATM Tool[1]:TCP_WARSTWA Base[1]:NA_WPROST ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=Above_Point; Kuka.BlendingEnabled=True; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=1; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FAbove_Point
+BAS(#CP_PARAMS, 1.0)
+SET_CD_PARAMS (0)
+LIN XAbove_Point C_Dis C_Dis
+;ENDFOLD
+;$$$$$$$$$$$$$$$$$$$$$$$$$$$
+;** KONIEC POBRANIA ********
+;$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+;//////////////////////// 
+;*****DO ODLOZENIA*******
+;////////////////////////
+;FOLD PTP TO_DROOP CONT Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_DROOP; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_DROOP
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_DROOP C_Dis
+;ENDFOLD
+;FOLD PTP TO_DROOP_05 CONT Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_DROOP_05; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_DROOP_05
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_DROOP_05 C_Dis
+;ENDFOLD
+
+
+XTO_DROOP_10={X 1300.0,Y 0.0,Z 1200.0,A -90.0,B 0.0,C 180.0}
+;FOLD PTP TO_DROOP_10 CONT Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_DROOP_10; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_DROOP_10
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_DROOP_10 C_Dis
+;ENDFOLD
+
+XPRE_DROP={X 1300.0,Y 0.0,Z 310.0,A -90.0,B 0.0,C 180.0}
+;FOLD PTP PRE_DROP CONT Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PRE_DROP; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FPRE_DROP
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XPRE_DROP C_Dis
+;ENDFOLD
+
+;Odlozenie
+XDROP={X 1300.0,Y 0.0,Z 160.0,A -90.0,B 0.0,C 180.0}
+;FOLD LIN DROP Vel=0.5 m/s LDATM Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=DROP; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FDROP
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XDROP
+;ENDFOLD
+
+;Otwarcie chwytaka
+;FOLD Gripper SET [1]WIDLY State=[1]OPEN Wait 0.2[s] Check with No Check ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=1;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=0
+;ENDFOLD
+GRPg_SetStateAndCheck(1, 1, 0.2, 0)
+;ENDFOLD
+;FOLD Gripper SET [2]Silowniki_scisku State=[1]OPEN Wait 0.2[s] Check with Strategy 1 ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=2;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=1
+;ENDFOLD
+GRPg_SetStateAndCheck(2, 1, 0.2, 1)
+;ENDFOLD
+;FOLD Gripper SET [4]SERWO State=[1]OPEN Wait 0.2[s] Check with Strategy 1 ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=4;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=1
+;ENDFOLD
+GRPg_SetStateAndCheck(4, 1, 0.2, 1)
+;ENDFOLD
+
+INTERRUPT OFF 24; PART CONTROL
+
+;Odjazd w bok
+XDROP_x_offset=XDROP
+XDROP_x_offset.z=xdrop_x_offset.z+10
+TOOL_DATA[1]={X 0.000000,Y 0.000000,Z 388.000000,A -0.000000,B -0.000000,C 0.000000}
+;FOLD LIN DROP_x_offset CONT Vel=0.5 m/s LDATL Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=DROP_x_offset; Kuka.BlendingEnabled=True; Kuka.MoveDataName=LDATL; Kuka.VelocityPath=0.5; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATL
+FDAT_ACT = FDROP_x_offset
+BAS(#CP_PARAMS, 0.5)
+SET_CD_PARAMS (0)
+LIN XDROP_x_offset C_Dis C_Dis
+;ENDFOLD
+
+;odjazd w pionie
+xpost_drop=xdrop
+xpost_drop.z=xdrop.z+150
+;FOLD LIN POST_DROP Vel=1 m/s LDATH Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=POST_DROP; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATH; Kuka.VelocityPath=1; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATH
+FDAT_ACT = FPOST_DROP
+BAS(#CP_PARAMS, 1.0)
+SET_CD_PARAMS (0)
+LIN XPOST_DROP
+;ENDFOLD
+
+;Sprawdzenie braku czesci
+WAIT FOR (NOT i_NaciskBoczny AND i_LewyKant)
+ 
+;FOLD PTP PRE_DROP Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PRE_DROP; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FPRE_DROP
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XPRE_DROP
+;ENDFOLD
+;FOLD PTP TO_DROOP_10 CONT Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[3]:ODLOZENIE;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_DROOP_10; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_DROOP_10
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XTO_DROOP_10 C_Dis
+;ENDFOLD
+;//////////////////////////// 
+;*****KONIEC ODLOZENIA*******
+;////////////////////////////
+
+;FOLD POMIAR CZASU CYKLU TIMER[1] zapis do TIMER[2]
+$TIMER_STOP[1]=TRUE
+$TIMER[2]=$TIMER[1]
+$TIMER[1]=0
+$TIMER_STOP[1]=FALSE
+;ENDFOLD Pomiarczasu cyklu
+;*****KONIEC PETLA PRACY*******
+;TEST FLAGI[1]
+;***********************
+UNTIL ($FLAG[1])
+
+
+; Przeskok z odlozenia palety
+LABEL1:
+
+;FOLD WYZEROWANIE TIMERA
+$TIMER_STOP[1]=TRUE
+$TIMER[1]=0
+;ENDFOLD zerowanie timeta[1]
+
+;FOLD PTP END_POINT Vel=100 % PDATH Tool[1]:TCP_WARSTWA Base[0];%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=END_POINT; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FEND_POINT
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XEND_POINT
+;ENDFOLD
+
+;FOLD PTP HOME Vel=100 % DEFAULT;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=HOME; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=DEFAULT; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PDEFAULT
+FDAT_ACT = FHOME
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XHOME
+;ENDFOLD
+
+END
+DEF Ruch_W_Dol(SPEED:IN) 
+DECL REAL SPEED
+
+$BWDSTART = FALSE
+LDAT_ACT=LLDAT0
+;FDAT_ACT=Fpozy2
+BAS(#CP_PARAMS,SPEED)
+LIN Xpozy2 
+
+$ADVANCE = 0
+END
+DEF IR_MOVESTOP()
+  INTERRUPT OFF 30 ;DOJAZD DO POZYCJI SZUKANIA PIERWSZEJ WARSTWY
+  INTERRUPT OFF 31 ;WYKRYCIE KRAWEDZI WELNY
+  INTERRUPT OFF 32 ;STOP ROTACJI
+  INTERRUPT OFF 33 ;STOP ROTACJI
+  INTERRUPT OFF 34 ;STOP WYKRYCIA  NACISKU W DOJEZDZEI PIONOWYM DO WARSTWY
+  INTERRUPT OFF 35 ;STOP DOJAZDU BOCZNEGO
+    BRAKE
+    RESUME
+;  HALT ; Dla testu odkomentowac
+END
+DEF IR_SLOWDOWN()
+  INTERRUPT OFF 23  ;dla zwolnienia predkosci robota
+  $OV_PRO = 0.3*$OV_PRO    ;Wartosc predkosci po wykryciu elementu  
+;  HALT ; Dla testu odkomentowac
+END
+DEF PART_CONTROL()
+  BRAKE
+  WAIT FOR i_NaciskBoczny 
+END
+DEF  OBROT_DOPASOWANIA( REQ_TOOL:IN, REQ_BASE:IN, ROT_BASE:IN)
+;FOLD OBROT_DOPASOWANIA
+; Incoming data  
+DECL INT REQ_TOOL ;TOOL
+DECL INT REQ_BASE ;BASE
+DECL FRAME ROT_BASE ;ROTATION
+   
+; Runtime access data
+DECL E6POS XWORK_POS
+FWORK_FDATA.TOOL_NO = REQ_TOOL
+FWORK_FDATA.BASE_NO = REQ_BASE
+
+;***************************************
+
+;Read the current position
+FDAT_ACT=FWORK_FDATA
+$BWDSTART = FALSE
+BAS(#CP_PARAMS,0.01)
+XWORK_POS=$POS_ACT
+
+;Test
+IF (ROT_BASE.A<>0)THEN
+  XWORK_POS.A = XWORK_POS.A + ROT_BASE.A
+ELSE
+  WAIT FOR FALSE
+ENDIF
+
+;***************************************
+
+;Movement to detect correct orientation  
+$BWDSTART = FALSE
+LDAT_ACT = LLDATrad
+FDAT_ACT = FWORK_FDATA
+BAS(#CP_PARAMS,0.01)
+$VEL.ORI1 = 1  ;obnienie predkosci obrotowej do 1st/sec obrotu wzg TCP
+LIN XWORK_POS
+
+;Interpolation set
+$ADVANCE = 0
+
+BAS (#INITMOV,0 ) ; Przywrocenie predkosci defoultowej '$VEL.ORI1'   
+;ENDFOLD FUNCTION
+END 

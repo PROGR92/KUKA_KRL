@@ -1,0 +1,140 @@
+&ACCESS RVO2
+&REL 52
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+&PARAM DISKPATH = KRC:\R1\Program\R_02
+DEF DROOP_PALL( )
+;FOLD INI;%{PE}
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+INTERRUPT DECL 21 WHEN  i_Paleta_POZ == FALSE DO IR_MOVESTOP()  ;Stop odlozenia palety na stos
+
+;wykomentowany
+;FOLD PTP HOME Vel=100 % DEFAULT;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=HOME; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=DEFAULT; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PDEFAULT
+FDAT_ACT = FHOME
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+;PTP XHOME
+;ENDFOLD
+
+
+;wykomentowany
+XTO_PAL_DROOP_05={X -45.0, Y 250.0, Z 2100.0, A -90, B 0.0, C 180}
+;FOLD PTP TO_PAL_DROOP_05 CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[5]:ODLOZENIE_PALETY;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=TO_PAL_DROOP_05; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FTO_PAL_DROOP_05
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+; PTP XTO_PAL_DROOP_05 C_Dis
+;ENDFOLD
+
+WAIT FOR  i_Paleta_POZ
+
+XPRE_PAL_DROOP={X 0.0,Y 0.0,Z 2100.0,A -90.0,B 0.0,C 180.0,S 2, T 11}
+;FOLD PTP PRE_PAL_DROOP CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[5]:ODLOZENIE_PALETY;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PRE_PAL_DROOP; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FPRE_PAL_DROOP
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XPRE_PAL_DROOP C_Dis
+;ENDFOLD
+
+;Odlozenie palety
+XPAL_DROOP={X 0.0,Y 0.0,Z 50.0,A -90.0,B 0.0,C 180.0,S 2, T 11}
+Fpozy2 = FPAL_DROOP
+Xpozy2 = XPAL_DROOP
+
+INTERRUPT ON 21
+Ruch_W_Dol(0.5) ; zjazd w dol 
+INTERRUPT OFF 21 
+$ADVANCE=3
+
+;FOLD Gripper SET [3]widly_paleta State=[1]OPEN Wait 0.2[s] Check with Strategy 1 ;%{PE}
+;FOLD Parameters Parameters ;%{h}
+;Params IlfProvider=GripperTech.GripperSet;setgripper=3;setstate=1;setcont=nocont;waittime=0.2;errorstrategy=1
+;ENDFOLD
+GRPg_SetStateAndCheck(3, 1, 0.2, 1)
+;ENDFOLD       
+
+XPAL_POST_DROOP=$POS_ACT
+XPAL_POST_DROOP.Z=XPAL_POST_DROOP.Z+100
+;FOLD LIN PAL_POST_DROOP Vel=1 m/s LDATM Tool[2]:TCP_PALETA Base[5]:ODLOZENIE_PALETY ;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PAL_POST_DROOP; Kuka.BlendingEnabled=False; Kuka.MoveDataName=LDATM; Kuka.VelocityPath=1; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=LIN
+;ENDFOLD
+$BWDSTART = FALSE
+LDAT_ACT = LLDATM
+FDAT_ACT = FPAL_POST_DROOP
+BAS(#CP_PARAMS, 1.0)
+SET_CD_PARAMS (0)
+LIN XPAL_POST_DROOP
+;ENDFOLD
+
+;FOLD PTP PRE_PAL_DROOP CONT Vel=100 % PDATH Tool[2]:TCP_PALETA Base[5]:ODLOZENIE_PALETY;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=PRE_PAL_DROOP; Kuka.BlendingEnabled=True; Kuka.MoveDataPtpName=PDATH; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PPDATH
+FDAT_ACT = FPRE_PAL_DROOP
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XPRE_PAL_DROOP C_Dis
+;ENDFOLD
+
+
+;FOLD PTP HOME Vel=100 % DEFAULT;%{PE}
+;FOLD Parameters ;%{h}
+;Params IlfProvider=kukaroboter.basistech.inlineforms.movement.old; Kuka.IsGlobalPoint=False; Kuka.PointName=HOME; Kuka.BlendingEnabled=False; Kuka.MoveDataPtpName=DEFAULT; Kuka.VelocityPtp=100; Kuka.CurrentCDSetIndex=0; Kuka.MovementParameterFieldEnabled=True; IlfCommand=PTP
+;ENDFOLD
+$BWDSTART = FALSE
+PDAT_ACT = PDEFAULT
+FDAT_ACT = FHOME
+BAS(#PTP_PARAMS, 100.0)
+SET_CD_PARAMS (0)
+PTP XHOME
+;ENDFOLD
+
+END
+
+DEF IR_MOVESTOP()
+  INTERRUPT OFF 21 ;BRAKE MOVEMENT DIRECTION
+    BRAKE
+    RESUME
+;  HALT ; Dla testu odkomentowac
+
+END
+
+DEF Ruch_W_Dol(SPEED:IN) 
+DECL REAL SPEED
+
+$BWDSTART = FALSE
+LDAT_ACT=LLDAT0
+FDAT_ACT=Fpozy2
+BAS(#CP_PARAMS,SPEED)
+LIN Xpozy2 
+
+$ADVANCE = 0
+END
